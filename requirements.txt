@@ -1,0 +1,12 @@
+# Core dependencies for FMCIB feature extraction
+#
+# foundation-cancer-image-biomarker pulls in torch, monai, project-lighter,
+# and many medical imaging deps automatically. Install size: ~2-3 GB.
+
+foundation-cancer-image-biomarker>=0.0.1
+SimpleITK>=2.3.0
+numpy>=1.24
+pandas>=2.0
+pyyaml>=6.0
+tqdm>=4.65
+pyarrow>=14.0       # for parquet output

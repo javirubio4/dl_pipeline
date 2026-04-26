@@ -1,0 +1,74 @@
+# Configuration for FMCIB feature extraction on the Humanitas training cohort.
+#
+# Edit the marked sections below once you can see Riccardo's actual data layout.
+# All other defaults are sensible starting values.
+
+# ---------------------------------------------------------------------------
+# DATA — set these once you see the real file structure at Humanitas
+# ---------------------------------------------------------------------------
+data:
+  # Root directory containing one subdirectory per patient (or one folder
+  # with a flat structure — both work, controlled by `patient_pattern`).
+  root: /path/to/humanitas/training
+
+  # Glob, relative to `root`, that returns one match per patient.
+  # Examples:
+  #   "*"              — each subdir of `root` is a patient
+  #   "patient_*"      — only subdirs starting with "patient_"
+  #   "sub-*/anat"     — BIDS-style
+  patient_pattern: "*"
+
+  # How to derive a patient ID from each match. Options:
+  #   "dirname"   — use the directory name
+  #   "basename"  — use the file basename without extension
+  patient_id_from: "dirname"
+
+  # Filename patterns for each modality, RELATIVE to the patient folder.
+  # `{patient_id}` is substituted at runtime. If your files are not named with
+  # the patient ID, just hard-code the names (e.g. "T1.nii.gz").
+  modalities:
+    t1:    "{patient_id}_T1.nii.gz"
+    t1ce:  "{patient_id}_T1CE.nii.gz"
+    t2:    "{patient_id}_T2.nii.gz"
+    flair: "{patient_id}_FLAIR.nii.gz"
+
+  # Mask file pattern (Riccardo's nnU-Net output).
+  mask_pattern: "{patient_id}_seg.nii.gz"
+
+# ---------------------------------------------------------------------------
+# MASK — how to extract the "Total" tumour region from Riccardo's labels
+# ---------------------------------------------------------------------------
+mask:
+  # If Riccardo's mask is multi-label (one file with values 1=L1, 2=L2, 3=L3,
+  # 4=Total or similar), set this to the integer label of the Total ROI.
+  # Set to "any_nonzero" to treat any non-zero voxel as Total — this works if
+  # Total is the union of L1+L2+L3 (which is usually how it's defined).
+  total_label: "any_nonzero"
+
+# ---------------------------------------------------------------------------
+# OUTPUT
+# ---------------------------------------------------------------------------
+output:
+  # Where to write the final Parquet file.
+  path: outputs/humanitas_train_features.parquet
+  # Also save the intermediate seed-point CSV for inspection / re-runs.
+  seed_csv: outputs/humanitas_train_seeds.csv
+
+# ---------------------------------------------------------------------------
+# COMPUTE
+# ---------------------------------------------------------------------------
+compute:
+  # "auto" picks cuda > mps > cpu. Override with "cuda", "mps" or "cpu".
+  device: auto
+  # Where the FMCIB weights live. If absent, the script will try to download.
+  weights_path: ./model_weights.torch
+
+# ---------------------------------------------------------------------------
+# RUN OPTIONS
+# ---------------------------------------------------------------------------
+run:
+  # Set to a small integer (e.g. 3) for smoke testing on the first N patients.
+  # Set to null to process the entire cohort.
+  max_patients: null
+  # Print per-patient progress and centroid coordinates.
+  verbose: true
