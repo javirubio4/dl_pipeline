@@ -39,7 +39,7 @@ synthetic 64³ volumes, then ship the same code to the HPC.
 
 ```bash
 # one-time setup
-python3.10 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
