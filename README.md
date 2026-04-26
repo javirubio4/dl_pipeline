@@ -1,4 +1,4 @@
-# meningioma_fmcib
+# dl_pipeline
 
 FMCIB feature extraction for the Humanitas meningioma MRI cohort.
 
@@ -13,7 +13,7 @@ from the saved Parquet — no GPU needed for that step.
 ## Project layout
 
 ```
-meningioma_fmcib/
+dl_pipeline/
 ├── README.md
 ├── requirements.txt
 ├── configs/
@@ -32,11 +32,9 @@ meningioma_fmcib/
 
 ## Two environments
 
-### 1. MacBook M2 (development & smoke testing)
+### 1. Local machine (development & smoke testing)
 
-You will *not* be able to extract features from real Humanitas data here — the
-8 GB RAM is fine for the model itself but the full preprocessing of 240³ MRI
-volumes is uncomfortable. Use the M2 to verify the code runs end-to-end on
+Verify the code runs end-to-end on
 synthetic 64³ volumes, then ship the same code to the HPC.
 
 ```bash
@@ -49,15 +47,15 @@ pip install -r requirements.txt
 python scripts/smoke_test.py
 ```
 
-If the smoke test prints `OK: features shape = (3, 16384)` you're good to go.
+If the smoke test prints `OK: features shape = (3, 16384)` the verification worked.
 
 ### 2. Humanitas HPC (real extraction)
 
 ```bash
 # clone or rsync the project to the HPC
-git clone <your_repo>   # or scp -r meningioma_fmcib/ hpc:~/
+git clone <dl_pipeline>   # or scp -r dl_pipeline/ hpc:~/
 
-# set up env (use the cluster's recommended Python ≥ 3.9)
+# set up env
 module load python/3.10 cuda    # adjust to the cluster's modules
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -76,7 +74,7 @@ The output is a single Parquet file:
 `outputs/humanitas_train_features.parquet` with columns
 `patient_id, t1_0…t1_4095, t1ce_0…t1ce_4095, t2_0…t2_4095, flair_0…flair_4095`.
 
-Copy that file back to the M2 to train classifiers locally.
+Copy that file back to the local machine to train classifiers locally.
 
 ## Things to verify on day 1 at Humanitas
 
