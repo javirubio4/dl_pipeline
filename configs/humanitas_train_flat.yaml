@@ -1,0 +1,72 @@
+# Configuration for FMCIB feature extraction — Humanitas flat (nnU-Net) layout.
+#
+# Use this config when volumes and segmentations live in separate directories
+# and each modality is a separate file with a channel suffix (_0000, _0001, …).
+#
+# Channel mapping — confirm with Riccardo before processing the full cohort:
+#   _0000 → T1       (native, pre-contrast)
+#   _0001 → T1CE     (post-contrast)
+#   _0002 → T2
+#   _0003 → FLAIR
+#
+# If the mapping differs, swap the channel numbers in `modalities` below.
+
+# ---------------------------------------------------------------------------
+# DATA
+# ---------------------------------------------------------------------------
+data:
+  layout: flat
+
+  # Directory containing volume .nii.gz files (one file per patient per modality).
+  volumes_root: /path/to/humanitas/imagesTr
+
+  # Directory containing segmentation mask files (one file per patient).
+  segmentations_root: /path/to/humanitas/labelsTr
+
+  # Glob relative to volumes_root that returns one file per patient.
+  # Using the first channel (_0000) as the reference anchor.
+  patient_pattern: "*_0000.nii.gz"
+
+  # Not used for flat layout (channel suffix is stripped automatically),
+  # but kept here so the field is explicit.
+  patient_id_from: "basename"
+
+  # Modality filename patterns inside volumes_root.
+  # {patient_id} is substituted at runtime (channel suffix already stripped).
+  modalities:
+    t1:    "{patient_id}_0000.nii.gz"
+    t1ce:  "{patient_id}_0001.nii.gz"
+    t2:    "{patient_id}_0002.nii.gz"
+    flair: "{patient_id}_0003.nii.gz"
+
+  # Mask filename pattern inside segmentations_root.
+  mask_pattern: "{patient_id}.nii.gz"
+
+# ---------------------------------------------------------------------------
+# MASK
+# ---------------------------------------------------------------------------
+mask:
+  # Set to the integer label of the Total ROI, or "any_nonzero" if the mask
+  # already contains only the tumour region.
+  total_label: "any_nonzero"
+
+# ---------------------------------------------------------------------------
+# OUTPUT
+# ---------------------------------------------------------------------------
+output:
+  path: outputs/humanitas_flat_features.parquet
+  seed_csv: outputs/humanitas_flat_seeds.csv
+
+# ---------------------------------------------------------------------------
+# COMPUTE
+# ---------------------------------------------------------------------------
+compute:
+  device: auto
+  weights_path: ./model_weights.torch
+
+# ---------------------------------------------------------------------------
+# RUN OPTIONS
+# ---------------------------------------------------------------------------
+run:
+  max_patients: null
+  verbose: true

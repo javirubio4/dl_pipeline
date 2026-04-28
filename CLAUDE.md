@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Cohort Facts
+
+Confirmed details from the Humanitas data provider:
+
+- **Training cohort:** 110 patients
+- **Co-registration:** all four modalities co-registered to T1CE
+- **Tumor count:** all patients have single tumors (no multi-lesion cases)
+- **Modality channel mapping:** [user will fill in once confirmed]
+- **Mask encoding:** [user will fill in once confirmed]
+
 ## Project Overview
 
 `dl_pipeline` is a medical imaging feature extraction pipeline for the Humanitas meningioma MRI cohort. It uses FMCIB (Foundation Cancer Image Biomarker), a pre-trained deep learning model, to extract 4096-dimensional feature vectors from 3D MRI images (T1, T1CE, T2, FLAIR modalities). Output is a wide-form Parquet file with one row per patient and 16,385 columns (`patient_id` + 4 modalities × 4096 features).
@@ -44,7 +54,9 @@ python scripts/make_synthetic_data.py --out /path/to/data --n 10 --seed 42
 
 The pipeline has four sequential stages orchestrated by `src/pipeline.py`:
 
-1. **Patient discovery** (`src/data.py`): Scans the data root for patient folders, validates that all required modality files and the mask file exist, returns `PatientRecord` objects with resolved paths.
+1. **Patient discovery** (`src/data.py`): Scans the data root for patients, validates that all required modality files and the mask file exist, and returns `PatientRecord` objects with resolved paths. Two layouts are supported (selected via `data.layout` in the config):
+   - **`per_folder`** — one subdirectory per patient, each containing modality and mask files. Used by the smoke test with synthetic data.
+   - **`flat`** — separate `volumes/` and `segmentations/` directories; modality files carry nnU-Net-style channel suffixes (`_0000`, `_0001`, `_0002`, `_0003`). Used for the real Humanitas data.
 
 2. **Seed point computation** (`src/seed_points.py`): Extracts the tumor mask centroid in LPS physical coordinates using SimpleITK. The centroid is passed to FMCIB as the crop center. NIfTI files use RAS affines; SimpleITK internally converts to LPS — this conversion is intentional, not a bug.
 
@@ -58,7 +70,9 @@ The pipeline has four sequential stages orchestrated by `src/pipeline.py`:
 
 All pipeline parameters live in a YAML config (see `configs/humanitas_train.yaml`). Key sections:
 
-- `data`: root path, glob patterns for patients/modalities/masks
+- `data`: root path, glob patterns for patients/modalities/masks; also:
+  - `data.layout`: `"per_folder"` (one directory per patient) or `"flat"` (shared `volumes/` + `segmentations/` dirs)
+  - `data.volumes_root` and `data.segmentations_root`: required when `layout` is `"flat"`
 - `mask.label`: which voxel label(s) represent the tumor (`any_nonzero` or integer)
 - `output`: paths for the output Parquet and seed CSV
 - `compute.device`: `auto` | `cuda` | `cpu` (MPS is explicitly disabled — Apple Silicon lacks `max_pool3d` support needed by FMCIB)

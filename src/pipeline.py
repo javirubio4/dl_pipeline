@@ -36,12 +36,19 @@ def build_seed_csv(
     mask_cfg = config.get("mask", {})
     max_patients = config.get("run", {}).get("max_patients")
 
+    layout = data_cfg.get("layout", "per_folder")
+    volumes_root = data_cfg.get("volumes_root")
+    segmentations_root = data_cfg.get("segmentations_root")
+
     records = discover_patients(
-        root=Path(data_cfg["root"]),
+        root=Path(data_cfg["root"]) if layout == "per_folder" else None,
         patient_pattern=data_cfg["patient_pattern"],
-        patient_id_from=data_cfg["patient_id_from"],
+        patient_id_from=data_cfg.get("patient_id_from", "basename"),
         modality_patterns=data_cfg["modalities"],
         mask_pattern=data_cfg["mask_pattern"],
+        layout=layout,
+        volumes_root=Path(volumes_root) if volumes_root else None,
+        segmentations_root=Path(segmentations_root) if segmentations_root else None,
     )
     if max_patients is not None:
         records = records[:max_patients]
