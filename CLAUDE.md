@@ -34,9 +34,9 @@ python scripts/download_weights.py --dest ./model_weights.torch
 
 **Run the pipeline on real data:**
 ```bash
-python scripts/extract_features.py --config configs/humanitas_train.yaml
+python scripts/extract_features.py --config configs/humanitas_train_flat.yaml
 # Override max patients for a quick test:
-python scripts/extract_features.py --config configs/humanitas_train.yaml --max-patients 5
+python scripts/extract_features.py --config configs/humanitas_train_flat.yaml --max-patients 5
 ```
 
 **End-to-end smoke test** (generates synthetic NIfTI data, runs full pipeline, validates output shape):
@@ -76,7 +76,7 @@ All pipeline parameters live in a YAML config (see `configs/humanitas_train.yaml
 - `mask.label`: which voxel label(s) represent the tumor (`any_nonzero` or integer)
 - `output`: paths for the output Parquet and seed CSV
 - `compute.device`: `auto` | `cuda` | `cpu` (MPS is explicitly disabled — Apple Silicon lacks `max_pool3d` support needed by FMCIB)
-- `compute.weights_file`: path to pre-downloaded weights (omit to download at runtime)
+- `compute.weights_path`: path to pre-downloaded weights (omit to download at runtime)
 - `run.max_patients`: limit processing to N patients (useful for testing)
 
 ## Key Constraints

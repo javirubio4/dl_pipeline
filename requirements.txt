@@ -3,7 +3,7 @@
 # foundation-cancer-image-biomarker pulls in torch, monai, project-lighter,
 # and many medical imaging deps automatically. Install size: ~2-3 GB.
 
-foundation-cancer-image-biomarker>=0.0.1
+foundation-cancer-image-biomarker==1.0.0
 SimpleITK>=2.3.0
 numpy>=1.24
 pandas>=1.5.3,<2.0
