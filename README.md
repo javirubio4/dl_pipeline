@@ -45,6 +45,9 @@ pip install -r requirements.txt
 
 # generate fake patients and run the whole pipeline on them
 python scripts/smoke_test.py
+
+# To visualize the results from the smoke test run
+python scripts/smoke_test.py --keep
 ```
 
 If the smoke test prints `OK: features shape = (3, 16384)` the verification worked.

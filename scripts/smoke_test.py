@@ -41,6 +41,7 @@ EXPECTED_MODALITIES = 4
 
 
 def main() -> None:
+    keep = "--keep" in sys.argv
     workdir = Path(tempfile.mkdtemp(prefix="fmcib_smoke_"))
     print(f"Smoke test working directory: {workdir}")
 
@@ -104,7 +105,7 @@ def main() -> None:
         print(f"\nOK: features shape = {wide.shape} (patients × (id + 4 modalities × 4096))")
 
     finally:
-        if "--keep" not in sys.argv:
+        if not keep:
             shutil.rmtree(workdir, ignore_errors=True)
 
 
