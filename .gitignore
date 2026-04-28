@@ -7,3 +7,4 @@ __pycache__/
 .DS_Store
 model_weights.torch
 outputs/
+dl_pipeline/model_weights.torch
