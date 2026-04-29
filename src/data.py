@@ -131,6 +131,7 @@ def _discover_flat(
     patient_pattern: str,
     modality_patterns: Dict[str, str],
     mask_pattern: str,
+    id_mapping: Optional[Dict[str, str]] = None,
 ) -> List[PatientRecord]:
     """Discover patients from an nnU-Net-style flat layout.
 
@@ -138,6 +139,12 @@ def _discover_flat(
     separate file with a channel suffix (_0000, _0001, …). The patient_pattern
     glob should match the reference-channel file (e.g. "*_0000.nii.gz") so that
     exactly one file per patient is returned.
+
+    If id_mapping is provided it acts as both a whitelist and a remapping table:
+    filesystem IDs absent from the dict are silently skipped, and present IDs are
+    replaced with their mapped value (e.g. AnonID) in the returned PatientRecords.
+    After discovery, every key in id_mapping must have been matched; otherwise
+    FileNotFoundError is raised listing the missing filesystem IDs.
     """
     volumes_root = Path(volumes_root).expanduser().resolve()
     segmentations_root = Path(segmentations_root).expanduser().resolve()
@@ -154,6 +161,7 @@ def _discover_flat(
         )
 
     records: List[PatientRecord] = []
+    matched_fs_ids: set = set()
     for match in matches:
         # Strip .nii.gz / .nii extension, then strip trailing channel suffix (_DDDD).
         stem = match.name
@@ -161,26 +169,41 @@ def _discover_flat(
             if stem.endswith(ext):
                 stem = stem[: -len(ext)]
                 break
-        patient_id = _strip_channel_suffix(stem)
+        fs_patient_id = _strip_channel_suffix(stem)
+
+        if id_mapping is not None:
+            if fs_patient_id not in id_mapping:
+                continue
+            matched_fs_ids.add(fs_patient_id)
+            patient_id = id_mapping[fs_patient_id]
+        else:
+            patient_id = fs_patient_id
 
         modalities: Dict[str, Path] = {}
         for name, pattern in modality_patterns.items():
-            path = volumes_root / pattern.format(patient_id=patient_id)
+            path = volumes_root / pattern.format(patient_id=fs_patient_id)
             if not path.exists():
                 raise FileNotFoundError(
-                    f"Patient {patient_id}: missing {name} modality at {path}"
+                    f"Patient {fs_patient_id}: missing {name} modality at {path}"
                 )
             modalities[name] = path
 
-        mask_path = segmentations_root / mask_pattern.format(patient_id=patient_id)
+        mask_path = segmentations_root / mask_pattern.format(patient_id=fs_patient_id)
         if not mask_path.exists():
             raise FileNotFoundError(
-                f"Patient {patient_id}: missing mask at {mask_path}"
+                f"Patient {fs_patient_id}: missing mask at {mask_path}"
             )
 
         records.append(
             PatientRecord(patient_id=patient_id, modalities=modalities, mask=mask_path)
         )
+
+    if id_mapping is not None:
+        missing = set(id_mapping.keys()) - matched_fs_ids
+        if missing:
+            raise FileNotFoundError(
+                f"Patient mapping contains IDs not found in volumes_root: {sorted(missing)}"
+            )
 
     return records
 

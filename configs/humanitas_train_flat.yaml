@@ -42,6 +42,13 @@ data:
   # Mask filename pattern inside segmentations_root.
   mask_pattern: "{patient_id}.nii.gz"
 
+  # Optional: filter to a specific patient list and remap filesystem IDs to
+  # anonymized output IDs. Remove or set to null to process all patients.
+  patient_mapping:
+    csv_path: configs/id_mapping_all_patients.csv
+    filesystem_id_column: PatientID   # must match volume filenames
+    output_id_column: AnonID          # written to output Parquet as patient_id
+
 # ---------------------------------------------------------------------------
 # MASK
 # ---------------------------------------------------------------------------

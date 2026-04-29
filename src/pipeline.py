@@ -7,7 +7,7 @@ Top-level entry is `run_extraction(config_dict)`. The CLI script in
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
@@ -40,6 +40,17 @@ def build_seed_csv(
     volumes_root = data_cfg.get("volumes_root")
     segmentations_root = data_cfg.get("segmentations_root")
 
+    id_mapping: Optional[Dict[str, str]] = None
+    mapping_cfg = data_cfg.get("patient_mapping")
+    if mapping_cfg:
+        mapping_df = pd.read_csv(mapping_cfg["csv_path"])
+        fs_col = mapping_cfg["filesystem_id_column"]
+        out_col = mapping_cfg["output_id_column"]
+        id_mapping = {
+            str(row[fs_col]).strip(): str(row[out_col]).strip()
+            for _, row in mapping_df.iterrows()
+        }
+
     records = discover_patients(
         root=Path(data_cfg["root"]) if layout == "per_folder" else None,
         patient_pattern=data_cfg["patient_pattern"],
@@ -49,6 +60,7 @@ def build_seed_csv(
         layout=layout,
         volumes_root=Path(volumes_root) if volumes_root else None,
         segmentations_root=Path(segmentations_root) if segmentations_root else None,
+        id_mapping=id_mapping,
     )
     if max_patients is not None:
         records = records[:max_patients]
