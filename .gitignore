@@ -4,11 +4,11 @@ __pycache__/
 *.pkl
 *.parquet
 *.csv
-*.sh
 .DS_Store
 model_weights.torch
 outputs/
 dl_pipeline/model_weights.torch
+scripts/submit_slurm.sh
 
 # Patient mapping files contain re-identification keys — never commit
 configs/id_mapping_*.csv
