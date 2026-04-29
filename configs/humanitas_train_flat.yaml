@@ -3,13 +3,11 @@
 # Use this config when volumes and segmentations live in separate directories
 # and each modality is a separate file with a channel suffix (_0000, _0001, …).
 #
-# Channel mapping — confirm with Riccardo before processing the full cohort:
+# Channel mapping (confirmed by data provider):
 #   _0000 → T1       (native, pre-contrast)
-#   _0001 → T1CE     (post-contrast)
-#   _0002 → T2
+#   _0001 → T2
+#   _0002 → T1CE     (post-contrast)
 #   _0003 → FLAIR
-#
-# If the mapping differs, swap the channel numbers in `modalities` below.
 
 # ---------------------------------------------------------------------------
 # DATA
@@ -18,10 +16,12 @@ data:
   layout: flat
 
   # Directory containing volume .nii.gz files (one file per patient per modality).
-  volumes_root: /path/to/humanitas/imagesTr
+  # Fill in real paths at HPC before running.
+  volumes_root: /path/to/be/filled/at/HPC
 
   # Directory containing segmentation mask files (one file per patient).
-  segmentations_root: /path/to/humanitas/labelsTr
+  # Fill in real paths at HPC before running.
+  segmentations_root: /path/to/be/filled/at/HPC
 
   # Glob relative to volumes_root that returns one file per patient.
   # Using the first channel (_0000) as the reference anchor.
@@ -29,21 +29,22 @@ data:
 
   # Not used for flat layout (channel suffix is stripped automatically),
   # but kept here so the field is explicit.
-  patient_id_from: "basename"
+  patient_id_from: basename_strip_channel
 
   # Modality filename patterns inside volumes_root.
   # {patient_id} is substituted at runtime (channel suffix already stripped).
   modalities:
     t1:    "{patient_id}_0000.nii.gz"
-    t1ce:  "{patient_id}_0001.nii.gz"
-    t2:    "{patient_id}_0002.nii.gz"
+    t2:    "{patient_id}_0001.nii.gz"
+    t1ce:  "{patient_id}_0002.nii.gz"
     flair: "{patient_id}_0003.nii.gz"
 
   # Mask filename pattern inside segmentations_root.
-  mask_pattern: "{patient_id}.nii.gz"
+  mask_pattern: "{patient_id}_seg.nii.gz"
 
-  # Optional: filter to a specific patient list and remap filesystem IDs to
-  # anonymized output IDs. Remove or set to null to process all patients.
+  # Filter discovery to the 185 patients in the mapping CSV and remap
+  # filesystem IDs (PatientID) to anonymized output IDs (AnonID).
+  # Remove or set to null to process all patients without remapping.
   patient_mapping:
     csv_path: configs/id_mapping_all_patients.csv
     filesystem_id_column: PatientID   # must match volume filenames
@@ -55,14 +56,15 @@ data:
 mask:
   # Set to the integer label of the Total ROI, or "any_nonzero" if the mask
   # already contains only the tumour region.
-  total_label: "any_nonzero"
+  # Pending confirmation from data provider whether mask is binary or multi-label.
+  total_label: any_nonzero
 
 # ---------------------------------------------------------------------------
 # OUTPUT
 # ---------------------------------------------------------------------------
 output:
-  path: outputs/humanitas_flat_features.parquet
-  seed_csv: outputs/humanitas_flat_seeds.csv
+  path: outputs/humanitas_features.parquet
+  seed_csv: outputs/humanitas_seeds.csv
 
 # ---------------------------------------------------------------------------
 # COMPUTE

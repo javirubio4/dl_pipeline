@@ -4,6 +4,7 @@ __pycache__/
 *.pkl
 *.parquet
 *.csv
+*.sh
 .DS_Store
 model_weights.torch
 outputs/

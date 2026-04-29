@@ -21,7 +21,7 @@
 #SBATCH --job-name=fmcib_humanitas
 #SBATCH --output=logs/fmcib_%j.out
 #SBATCH --error=logs/fmcib_%j.err
-#SBATCH --time=02:00:00        # 110 patients x 4 modalities ≈ 30–60 min on GPU
+#SBATCH --time=04:00:00        # 185 patients x 4 modalities ≈ 60–120 min on GPU; 4h gives headroom
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1           # remove line if no GPU available
