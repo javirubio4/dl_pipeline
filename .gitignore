@@ -8,3 +8,9 @@ __pycache__/
 model_weights.torch
 outputs/
 dl_pipeline/model_weights.torch
+
+# Patient mapping files contain re-identification keys — never commit
+configs/id_mapping_*.csv
+
+# Patient ID lists (whitelists) — also sensitive
+configs/*_patient_ids.csv

@@ -34,6 +34,7 @@ def discover_patients(
     layout: str = "per_folder",
     volumes_root: Optional[Path] = None,
     segmentations_root: Optional[Path] = None,
+    id_mapping: Optional[Dict[str, str]] = None,
 ) -> List[PatientRecord]:
     """Find all patients and resolve their file paths.
 
@@ -75,6 +76,7 @@ def discover_patients(
             patient_pattern=patient_pattern,
             modality_patterns=modality_patterns,
             mask_pattern=mask_pattern,
+            id_mapping=id_mapping,
         )
     raise ValueError(f"unknown layout: {layout!r}. Expected 'per_folder' or 'flat'")
 
