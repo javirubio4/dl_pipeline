@@ -17,7 +17,7 @@ dl_pipeline/
 ├── README.md
 ├── requirements.txt
 ├── configs/
-│   └── humanitas_train.yaml      # adapt paths to real Humanitas layout
+│   └── humanitas_train_flat.yaml      # adapt paths to real Humanitas layout
 ├── src/
 │   ├── data.py                    # patient discovery, file path resolution
 │   ├── seed_points.py             # mask centroid → LPS coordinates
@@ -66,7 +66,7 @@ pip install -r requirements.txt
 # pre-download FMCIB weights once (compute nodes often have no internet)
 python scripts/download_weights.py --dest ./model_weights.torch
 
-# edit configs/humanitas_train.yaml to point at the real data
+# edit configs/humanitas_train_flat.yaml to point at the real data
 #   - data_root, modality filename patterns, mask pattern
 
 # launch on a GPU node (wrap in your scheduler's submission file)
